@@ -9,6 +9,7 @@ Rustls config into actix-web to provide an example HTTPS server.
 This is a simple example for building a config for a Rustls server:
 
 ```rust
+    // You have to do these yourself. The demo server has code to load_key PEM files.
     let certs: Vec<CertificateDer> = load_certs();
     let private_key: PrivateKeyDer = load_key();
 
