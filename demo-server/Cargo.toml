@@ -7,6 +7,8 @@ edition = "2021"
 actix-tls = { version = "3.4.0", features = ["rustls-0_23"] }
 actix-web = { version = "4.9.0", features = ["rustls-0_23"] }
 rustls = "0.23.18"
-rustls-libcrux-provider = { workspace=true }
+rustls-libcrux-provider = { workspace = true }
 log = "0.4.22"
 env_logger = "0.11.5"
+handlebars = "6.2.0"
+serde = { version = "1.0.215", features = ["derive"] }

@@ -1,19 +1,54 @@
 use std::{any::Any, sync::Arc};
 
-use actix_web::{dev::Extensions, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
+use actix_web::get;
+use actix_web::{
+    dev::Extensions, http::header::ContentType, middleware, web, App, HttpRequest, HttpResponse,
+    HttpServer,
+};
+use rustls::NamedGroup;
 use rustls::{
     pki_types::{pem::PemObject, CertificateDer, PrivateKeyDer},
     ServerConfig, DEFAULT_VERSIONS,
 };
 
-mod index;
+static INDEX_TPL: &str = include_str!("../templates/index.html");
 
 static BULMA_CSS: &str = include_str!("../assets/bulma.min.css");
+static BEER_CSS: &str = include_str!("../assets/beer.min.css");
+static BEER_JS: &str = include_str!("../assets/beer.min.js");
+static COLORS_JS: &str = include_str!("../assets/material-dynamic-colors.min.js");
 
 type TlsSession = actix_tls::accept::rustls_0_23::TlsStream<actix_web::rt::net::TcpStream>;
 
-async fn bulma_min_css(_req: HttpRequest) -> HttpResponse {
-    HttpResponse::Ok().content_type("text/css").body(BULMA_CSS)
+macro_rules! static_file {
+    ($content_type:literal, $body:expr) => {{
+        async fn handle(_req: HttpRequest) -> HttpResponse {
+            HttpResponse::Ok().content_type($content_type).body($body)
+        }
+
+        handle
+    }};
+}
+
+#[get("/index.html")]
+async fn index(hbs: web::Data<handlebars::Handlebars<'_>>, req: HttpRequest) -> HttpResponse {
+    let named = req.conn_data::<NamedGroup>().unwrap();
+    let group_name = named_group_string(named);
+
+    let is_pq = *named == NamedGroup::Unknown(0x11ec);
+
+    #[derive(serde::Serialize)]
+    struct Data {
+        group_name: String,
+        is_pq: bool,
+    }
+
+    match hbs.render("index", &Data { group_name, is_pq }) {
+        Ok(body) => HttpResponse::Ok()
+            .content_type(ContentType::html())
+            .body(body),
+        Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+    }
 }
 
 #[actix_web::main]
@@ -31,15 +66,27 @@ async fn real_main() -> Result<(), Error> {
 
     let config = load_rustls_config()?;
 
+    let mut hbs = handlebars::Handlebars::new();
+    hbs.register_template_string("index", INDEX_TPL).unwrap();
+
+    let hbs_ref = web::Data::new(hbs);
+
     log::info!("starting HTTPS server at https://localhost:8443");
 
-    HttpServer::new(|| {
+    HttpServer::new(move || {
         App::new()
             // enable logger
             .wrap(middleware::Logger::default())
+            .app_data(hbs_ref.clone())
             // register simple handler, handle all methods
-            .service(web::resource("/index.html").to(index::handle))
-            .service(web::resource("/bulma.min.css").to(bulma_min_css))
+            .service(index)
+            .service(web::resource("/bulma.min.css").to(static_file!("text/css", BULMA_CSS)))
+            .service(web::resource("/beer.min.css").to(static_file!("text/css", BEER_CSS)))
+            .service(web::resource("/beer.min.js").to(static_file!("text/javascript", BEER_JS)))
+            .service(
+                web::resource("/material-dynamic-colors.min.js")
+                    .to(static_file!("text/javascript", COLORS_JS)),
+            )
             .service(web::redirect("/", "/index.html"))
     })
     .on_connect(extract_kx_group)
@@ -116,5 +163,12 @@ impl std::error::Error for Error {
             Error::RustlsBind(e) => Some(e),
             Error::RustlsRun(e) => Some(e),
         }
+    }
+}
+
+fn named_group_string(group: &NamedGroup) -> String {
+    match group {
+        NamedGroup::Unknown(0x11ec) => "Hybrid_ML-KEM_X25519".to_string(),
+        other => format!("{other:?}"),
     }
 }

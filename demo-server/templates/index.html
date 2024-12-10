@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TLS Cipher Suite</title>
+<link href="/beer.min.css" rel="stylesheet">
+<script type="module" src="/beer.min.js"></script>
+<script type="module" src="/material-dynamic-colors.min.js"></script>
+</head>
+<body>
+<main class="responsive">
+<h1>Verified Post-Quantum Crypto on the Web</h1>
+
+<article>
+    <h4>Is your browser PQ-ready?</h4>
+    <div>
+        {{#if is_pq}}
+            Yes!
+        {{else}}
+            No!
+        {{/if}}
+
+    </div>
+    <div>
+        You connected using {{group_name}}.
+        {{#if is_pq}}
+            This means that this connection is secure against
+            future quantum computers!
+        {{else}}
+            This means that this connection is not secure against
+            future quantum computers :(
+        {{/if}}
+    </div>
+
+    <h4>Want to learn more?</h4>
+    <div>
+        Here are some blog posts:
+        <ul>
+            <li> <a href="https://cryspen.com/post/fospqc/">fospqc</a>
+            <li> <a href="https://bughunters.google.com/blog/6038863069184000/formally-verified-post-quantum-algorithms">formally verified post quantum algorithms</a>
+            <li> <a href="https://cryspen.com/post/pqc-iot-announce/">pqc iot announce</a>
+            <li> <a href="https://cryspen.com/post/ml-kem-verification/">ml-kem verificatio</a>
+            <li> <a href="https://cryspen.com/post/ml-kem-implementation/">ml-kem implementation</a>
+        </ul>
+
+        Here are some technical references:
+        <ul>
+            <li> <a href="https://datatracker.ietf.org/doc/draft-kwiatkowski-tls-ecdhe-mlkem/">tls ecdhe-ml-kem draft</a>
+            <li> <a href="https://www.mozilla.org/en-US/firefox/132.0/releasenotes/">firefox release notes</a>
+            <li> <a href="https://security.googleblog.com/2024/09/a-new-path-for-kyber-on-web.html">kyber on the web</a>
+            <li> <a href="https://pq.cloudflareresearch.com/">similar portal by cloudflare research</a>
+        </ul>
+    </div>
+</article>
+
+
+</main>
+
+</body>
+</html>`
