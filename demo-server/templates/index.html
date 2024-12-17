@@ -5,16 +5,15 @@
 <title>TLS Cipher Suite</title>
 <link href="/silicon.min.css" rel="stylesheet">
 <style type="text/css">
+    /* these work well both in dark and light mode */
     :root{
-      /* these work well both in dark and light mode */
       --color-green-fg: #368143;
       --color-red-fg:   #d73333;
-
     }
 
+    /* for big screens, set fixed values instead of relative values for widths */
     @media screen and (min-width: 1000px) {
       :root {
-        /* set fixed values instead of relative values for widths*/
         --xs-width: 256px;
         --small-width: 384px; 
         --medium-width: 640px; 
@@ -23,20 +22,22 @@
       }
     }
 
+    /* set the styles for the Yes!/No! text */
     .pq-yes {
       font-size: 133%;
       color: var(--color-green-fg);
     }
-
     .pq-no {
       font-size: 133%;
       color: var(--color-red-fg);
     }
 
+    /* I liked medium width better :shrug: */
     body {
       min-width: var(--medium-width);
     }
 
+    /* fix spacing inside card */
     article.card > *:first-child {
       margin-top: 0;
     }
