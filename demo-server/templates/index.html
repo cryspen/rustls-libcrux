@@ -5,10 +5,19 @@
 <title>TLS Cipher Suite</title>
 <link href="/silicon.min.css" rel="stylesheet">
 <style type="text/css">
-    /* these work well both in dark and light mode */
     :root{
+      /* these work well both in dark and light mode */
       --color-green-fg: #368143;
       --color-red-fg:   #d73333;
+
+      /* these will be overridden for dark mode */
+      --hl-color: #0a0a0a;
+    }
+
+    @media ( prefers-color-scheme: dark ) {
+      :root{
+        --hl-color: #ebebeb;
+      }
     }
 
     /* for big screens, set fixed values instead of relative values for widths */
@@ -44,6 +53,12 @@
     article.card > *:last-child {
       margin-bottom: 0;
     }
+
+    /* a subtle highlight */
+    span.hl {
+      color: var(--hl-color);
+      font-weight: 500;
+    }
 </style>
 </head>
 <body>
@@ -72,7 +87,7 @@
 
 <article>
     <h4>Want to Learn More?</h4>
-    <p>Here are some blog posts to start you off:</p>
+    <p>Here are some <span class=hl>blog posts</span> to start you off:</p>
     <ul>
         <li> <a href="https://cryspen.com/post/fospqc/">Formally Verified Post-Quantum Cryptography</a>
         <li> <a href="https://cryspen.com/post/ml-kem-implementation/">Verified ML-KEM (Kyber) in Rust</a>
@@ -81,7 +96,7 @@
         <li> <a href="https://bughunters.google.com/blog/6038863069184000/formally-verified-post-quantum-algorithms">Google Bug Hunters: Formally Verified Post-Quantum Algorithms</a>
         <li> <a href="https://security.googleblog.com/2024/09/a-new-path-for-kyber-on-web.html">Google Security Blog: A new path for Kyber on the web</a>
     </ul>
-    <p>Here are some technical references:</p>
+    <p>Here are some <span class=hl>technical references</span>:</p>
     <ul>
         <li> <a href="https://datatracker.ietf.org/doc/draft-kwiatkowski-tls-ecdhe-mlkem/">Internet-Draft: Post-quantum hybrid ECDHE-MLKEM Key Agreement for TLSv1.3</a>
         <li> <a href="https://www.mozilla.org/en-US/firefox/132.0/releasenotes/">Firefox 132.0 Release Notes</a>
