@@ -13,10 +13,7 @@ use rustls::{
 
 static INDEX_TPL: &str = include_str!("../templates/index.html");
 
-static BULMA_CSS: &str = include_str!("../assets/bulma.min.css");
-static BEER_CSS: &str = include_str!("../assets/beer.min.css");
-static BEER_JS: &str = include_str!("../assets/beer.min.js");
-static COLORS_JS: &str = include_str!("../assets/material-dynamic-colors.min.js");
+static SILICON_CSS: &str = include_str!("../assets/silicon.min.css");
 
 type TlsSession = actix_tls::accept::rustls_0_23::TlsStream<actix_web::rt::net::TcpStream>;
 
@@ -79,18 +76,12 @@ async fn real_main() -> Result<(), Error> {
             .wrap(middleware::Logger::default())
             .app_data(hbs_ref.clone())
             // register simple handler, handle all methods
-            .service(index)
-            .service(web::resource("/bulma.min.css").to(static_file!("text/css", BULMA_CSS)))
-            .service(web::resource("/beer.min.css").to(static_file!("text/css", BEER_CSS)))
-            .service(web::resource("/beer.min.js").to(static_file!("text/javascript", BEER_JS)))
-            .service(
-                web::resource("/material-dynamic-colors.min.js")
-                    .to(static_file!("text/javascript", COLORS_JS)),
-            )
+            .service(web::resource("/silicon.min.css").to(static_file!("text/css", SILICON_CSS)))
             .service(web::redirect("/", "/index.html"))
+            .service(index)
     })
     .on_connect(extract_kx_group)
-    .bind_rustls_0_23("127.0.0.1:8443", config)
+    .bind_rustls_0_23("0.0.0.0:8443", config)
     .map_err(Error::RustlsBind)?
     .run()
     .await
