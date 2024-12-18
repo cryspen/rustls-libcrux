@@ -1,3 +1,4 @@
+use std::net::SocketAddr;
 use std::{any::Any, sync::Arc};
 
 use actix_web::get;
@@ -61,14 +62,30 @@ async fn main() -> std::io::Result<()> {
 async fn real_main() -> Result<(), Error> {
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
 
-    let config = load_rustls_config()?;
+    let args: Vec<String> = std::env::args().collect();
+    let args: [String; 4] = args
+        .try_into()
+        .map_err(|args: Vec<_>| Error::WrongArgumentCount(args.len()))?;
+
+    let [_, bind_addrs, cert_file_path, key_file_path] = args;
+
+    let bind_addrs: Vec<_> = bind_addrs
+        .split(',')
+        .map(str::parse::<SocketAddr>)
+        .collect::<Result<_, _>>()
+        .unwrap();
+
+    let config = load_rustls_config(&key_file_path, &cert_file_path)?;
 
     let mut hbs = handlebars::Handlebars::new();
     hbs.register_template_string("index", INDEX_TPL).unwrap();
 
     let hbs_ref = web::Data::new(hbs);
 
-    log::info!("starting HTTPS server at https://localhost:8443");
+    log::info!("starting HTTPS server.");
+    for bind_addr in &bind_addrs {
+        log::info!("  binding on {bind_addr:?}");
+    }
 
     HttpServer::new(move || {
         App::new()
@@ -81,7 +98,7 @@ async fn real_main() -> Result<(), Error> {
             .service(index)
     })
     .on_connect(extract_kx_group)
-    .bind_rustls_0_23("0.0.0.0:8443", config)
+    .bind_rustls_0_23(bind_addrs.as_slice(), config)
     .map_err(Error::RustlsBind)?
     .run()
     .await
@@ -96,20 +113,13 @@ fn extract_kx_group(session: &dyn Any, extensions: &mut Extensions) {
     extensions.insert(group.name());
 }
 
-fn load_rustls_config() -> Result<ServerConfig, Error> {
-    let args: Vec<String> = std::env::args().collect();
-    let args: [String; 3] = args
-        .try_into()
-        .map_err(|args: Vec<_>| Error::WrongArgumentCount(args.len()))?;
-
-    let [_, cert_file, private_key_file] = args;
-
-    let certs: Result<Vec<_>, _> = CertificateDer::pem_file_iter(cert_file)
+fn load_rustls_config(key_file_path: &str, cert_file_path: &str) -> Result<ServerConfig, Error> {
+    let certs: Result<Vec<_>, _> = CertificateDer::pem_file_iter(cert_file_path)
         .map_err(Error::LoadCertFile)?
         .collect();
     let certs = certs.map_err(Error::LoadCertFile)?;
 
-    let private_key = PrivateKeyDer::from_pem_file(private_key_file).map_err(Error::LoadKeyFile)?;
+    let private_key = PrivateKeyDer::from_pem_file(key_file_path).map_err(Error::LoadKeyFile)?;
 
     ServerConfig::builder_with_provider(Arc::new(rustls_libcrux_provider::provider()))
         .with_protocol_versions(DEFAULT_VERSIONS)
