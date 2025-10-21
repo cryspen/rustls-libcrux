@@ -3,7 +3,7 @@ use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::fmt::Debug;
-use rand_core::RngCore;
+use rand_core::TryRngCore;
 use std::error::Error as StdError;
 
 use libcrux::hpke::aead::AEAD;
@@ -174,13 +174,10 @@ impl Hpke for HpkeRs {
             }
         };
 
-        let secret_key = HpkeRustCrypto::kem_key_gen(kem_algorithm, &mut HpkeRustCrypto::prng())
+        let (public_key, secret_key) = HpkeRustCrypto::kem_key_gen(kem_algorithm, &mut HpkeRustCrypto::prng())
             .map_err(other_err)?;
-        let public_key = HpkePublicKey(
-            HpkeRustCrypto::kem_derive_base(kem_algorithm, &secret_key).map_err(other_err)?,
-        );
 
-        Ok((public_key, HpkePrivateKey::from(secret_key)))
+        Ok((HpkePublicKey(public_key), HpkePrivateKey::from(secret_key)))
     }
 
     fn suite(&self) -> HpkeSuite {
@@ -286,7 +283,7 @@ impl Hpke for LibcruxHpke {
         pub_key: &HpkePublicKey,
     ) -> Result<(EncapsulatedSecret, Vec<u8>), Error> {
         let mut randomness = alloc::vec![0u8; libcrux::hpke::kem::Nsecret(self.0 .1)];
-        rand_core::OsRng.fill_bytes(&mut randomness);
+        rand_core::OsRng.try_fill_bytes(&mut randomness).unwrap();
 
         libcrux::hpke::HpkeSeal(
             self.0, &pub_key.0, info, aad, plaintext, None, None, None, randomness,
@@ -301,7 +298,7 @@ impl Hpke for LibcruxHpke {
         pub_key: &HpkePublicKey,
     ) -> Result<(EncapsulatedSecret, Box<dyn HpkeSealer + 'static>), Error> {
         let mut randomness = alloc::vec![0u8; libcrux::hpke::kem::Nsecret(self.0 .1)];
-        rand_core::OsRng.fill_bytes(&mut randomness);
+        rand_core::OsRng.try_fill_bytes(&mut randomness).unwrap();
 
         let (kem_ctxt, ctx) = libcrux::hpke::SetupBaseS(self.0, &pub_key.0, info, randomness)
             .map_err(|_| Error::General(alloc::string::String::from("hpke setup sealer error")))?;
@@ -353,7 +350,7 @@ impl Hpke for LibcruxHpke {
 
     fn generate_key_pair(&self) -> Result<(HpkePublicKey, HpkePrivateKey), Error> {
         let mut randomness = alloc::vec![0u8; libcrux::hpke::kem::Nsecret(self.0 .1)];
-        rand_core::OsRng.fill_bytes(&mut randomness);
+        rand_core::OsRng.try_fill_bytes(&mut randomness).unwrap();
 
         libcrux::hpke::kem::GenerateKeyPair(self.0 .1, randomness)
             .map_err(|_| Error::General(String::from("hpke kem keygen error")))

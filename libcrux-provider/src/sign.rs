@@ -6,7 +6,7 @@ use alloc::vec::Vec;
 use der::oid::Arc as OidArc;
 use der::{Decode, Tag, Tagged};
 use pkcs8::ObjectIdentifier;
-use rand_core::RngCore;
+use rand_core::TryRngCore;
 use rustls::pki_types::PrivateKeyDer;
 use rustls::sign::{Signer, SigningKey};
 use rustls::{SignatureAlgorithm, SignatureScheme};
@@ -175,7 +175,7 @@ impl Signer for EcdsaSigningKeyP256 {
             signature::Algorithm::EcDsaP256(signature::DigestAlgorithm::Sha256),
             message,
             &self.key,
-            &mut rng,
+            &mut rng.unwrap_mut(),
         )
         .map_err(|_| rustls::Error::General("signing failed".into()))
         .map(|sig| match sig {
@@ -199,7 +199,7 @@ impl Signer for LibcruxSigningKey {
                 hash_algo,
             } => {
                 let mut salt = [0u8; 32];
-                rand_core::OsRng.fill_bytes(&mut salt);
+                rand_core::OsRng.try_fill_bytes(&mut salt).unwrap();
                 let pub_key =
                     signature::rsa_pss::RsaPssPublicKey::new(*key_size, n).map_err(|_| {
                         rustls::Error::General(String::from("error building public key"))
@@ -222,7 +222,7 @@ impl Signer for LibcruxSigningKey {
                     } // EcdsaSignatureScheme::ECDSA_NISTP384_SHA384 => todo!(),
                       // EcdsaSignatureScheme::ECDSA_NISTP521_SHA512 => todo!(),
                 };
-                let sig = signature::sign(alg, message, private_key, &mut rand_core::OsRng)
+                let sig = signature::sign(alg, message, private_key, &mut rand_core::OsRng.unwrap_mut())
                     .map_err(|_| rustls::Error::General(String::from("signing error")))?;
 
                 match sig {

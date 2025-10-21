@@ -34,7 +34,7 @@ struct Provider;
 
 impl rustls::crypto::SecureRandom for Provider {
     fn fill(&self, bytes: &mut [u8]) -> Result<(), rustls::crypto::GetRandomFailed> {
-        use rand_core::RngCore;
+        use rand_core::TryRngCore;
         rand_core::OsRng
             .try_fill_bytes(bytes)
             .map_err(|_| rustls::crypto::GetRandomFailed)

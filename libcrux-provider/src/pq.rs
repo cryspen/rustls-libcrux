@@ -2,7 +2,7 @@ use core::convert::TryFrom;
 use libcrux_ml_kem::mlkem768;
 
 use alloc::{boxed::Box, vec, vec::Vec};
-use rand_core::RngCore;
+use rand_core::TryRngCore;
 use rustls::{
     crypto::{ActiveKeyExchange, CompletedKeyExchange, SharedSecret, SupportedKxGroup},
     ffdhe_groups::FfdheGroup,
@@ -20,7 +20,7 @@ impl SupportedKxGroup for X25519MlKem768 {
         let x25519 = crate::kx::X25519.start()?;
 
         let mut rand = [0u8; libcrux_ml_kem::KEY_GENERATION_SEED_SIZE];
-        rand_core::OsRng.fill_bytes(&mut rand);
+        rand_core::OsRng.try_fill_bytes(&mut rand).unwrap();
         let ml_kem = mlkem768::generate_key_pair(rand);
 
         let mut combined_pub_key = Vec::with_capacity(COMBINED_PUBKEY_LEN);
@@ -42,7 +42,7 @@ impl SupportedKxGroup for X25519MlKem768 {
         let x25519 = crate::kx::X25519.start_and_complete(share.x25519)?;
 
         let mut rand = [0u8; libcrux_ml_kem::ENCAPS_SEED_SIZE];
-        rand_core::OsRng.fill_bytes(&mut rand);
+        rand_core::OsRng.try_fill_bytes(&mut rand).unwrap();
 
         let pk =
             mlkem768::MlKem768PublicKey::try_from(share.ml_kem).map_err(|_| INVALID_KEY_SHARE)?;
