@@ -7,6 +7,7 @@ use der::oid::Arc as OidArc;
 use der::{Decode, Tag, Tagged};
 use pkcs8::ObjectIdentifier;
 use rand_core::TryRngCore;
+use sec1::EcPrivateKey;
 use rustls::pki_types::PrivateKeyDer;
 use rustls::sign::{Signer, SigningKey};
 use rustls::{SignatureAlgorithm, SignatureScheme};
@@ -79,7 +80,11 @@ impl TryFrom<PrivateKeyDer<'_>> for LibcruxSigningKey {
                             _ => return Err(pkcs8::Error::KeyMalformed),
                         };
 
-                        let key = private_key_info.private_key.to_vec();
+                        let key = private_key_info.private_key;
+                        let key = EcPrivateKey::try_from(key)
+                            .map_err(|_| pkcs8::Error::KeyMalformed)?
+                            .private_key
+                            .to_vec();
 
                         Ok(Self::Ecdsa(key, scheme))
                     }
