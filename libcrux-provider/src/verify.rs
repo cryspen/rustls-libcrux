@@ -4,9 +4,9 @@ use libcrux::signature::{
     verify, DigestAlgorithm, EcDsaP256Signature, Ed25519Signature, Signature,
 };
 use rustls::crypto::WebPkiSupportedAlgorithms;
-use rustls::pki_types::{AlgorithmIdentifier, InvalidSignature, SignatureVerificationAlgorithm};
+use rustls::pki_types::{alg_id, AlgorithmIdentifier, InvalidSignature, SignatureVerificationAlgorithm};
 use rustls::SignatureScheme;
-use webpki::{alg_id, aws_lc_rs::RSA_PKCS1_2048_8192_SHA256 as AWS_LC_RSA_PKCS1_SHA256};
+use webpki::{aws_lc_rs::RSA_PKCS1_2048_8192_SHA256 as AWS_LC_RSA_PKCS1_SHA256};
 
 pub static ALGORITHMS: WebPkiSupportedAlgorithms = WebPkiSupportedAlgorithms {
     all: &[
