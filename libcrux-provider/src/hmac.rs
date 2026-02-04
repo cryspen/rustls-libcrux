@@ -26,11 +26,11 @@ impl crypto::hmac::Key for Sha256HmacKey {
         }
         data.extend_from_slice(last);
 
-        let result = libcrux::hmac::hmac(libcrux::hmac::Algorithm::Sha256, &self.0, &data, None);
+        let result = libcrux_hmac::hmac(libcrux_hmac::Algorithm::Sha256, &self.0, &data, None);
         crypto::hmac::Tag::new(&result[..])
     }
 
     fn tag_len(&self) -> usize {
-        libcrux_hmac::tag_size(libcrux::hmac::Algorithm::Sha256)
+        libcrux_hmac::tag_size(libcrux_hmac::Algorithm::Sha256)
     }
 }

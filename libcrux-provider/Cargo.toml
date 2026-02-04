@@ -6,25 +6,25 @@ license = "Apache-2.0 OR ISC OR MIT"
 description = "A rustls crypto provider based on libcrux."
 
 [dependencies]
-rustls = { version = "0.23.18" }
+rustls = { version = "0.23.36" }
 
-libcrux = { git = "https://github.com/cryspen/libcrux", rev = "8ebe732" }
-libcrux-sha2 = { git = "https://github.com/cryspen/libcrux", rev = "8ebe732" }
-libcrux-hmac = { git = "https://github.com/cryspen/libcrux", rev = "8ebe732" }
-libcrux-ed25519 = { git = "https://github.com/cryspen/libcrux", rev = "8ebe732" }
-libcrux-traits = { git = "https://github.com/cryspen/libcrux", rev = "8ebe732" }
-libcrux-ml-kem = { git = "https://github.com/cryspen/libcrux", rev = "8ebe732" }
+libcrux = { git = "https://github.com/cryspen/libcrux", rev = "367ce83" }
+libcrux-sha2 = "0.0.5"
+libcrux-hmac = "0.0.5"
+libcrux-ed25519 = "0.0.5"
+libcrux-traits = "0.0.5"
+libcrux-ml-kem = "0.0.6"
 
 der = "0.7"
-hpke-rs = "0.3"
-hpke-rs-crypto = "0.3"
-hpke-rs-rust-crypto = "0.3"
+hpke-rs = "0.5"
+hpke-rs-crypto = "0.4"
+hpke-rs-rust-crypto = "0.4"
 pkcs8 = "0.10.2"
 pkcs1 = "0.7.5"
 pki-types = { package = "rustls-pki-types", version = "1" }
 rand_core = { version = "0.9", features = ["os_rng"] }
-webpki = { package = "rustls-webpki", version = "0.102", features = [
-    "alloc", "aws_lc_rs",
+webpki = { package = "rustls-webpki", version = "0.103", features = [
+    "alloc", 
 ], default-features = false }
 
 [dev-dependencies]
